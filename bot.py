@@ -68,6 +68,18 @@ Más info en airelib.re
 """
     return text
 
+def chunkify(a_list: list, n: int) -> list:
+    k, m = divmod(len(a_list), n)
+    return (a_list[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
+
+def parse_tweets(text: str)-> list:
+    parts = len(text) // 280 + 1
+    if parts == 1:
+        return [text]
+    lines = text.splitlines()
+    pre_lists = chunkify(lines, parts)
+    tweets = ['\n'.join(pre_tweet) for pre_tweet in pre_lists]  # re build the tweets
+    return tweets
 
 def send_tweet(msg: str, reply_id=None) -> str:
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
@@ -85,6 +97,9 @@ def send_tweet(msg: str, reply_id=None) -> str:
 if __name__ == "__main__":
     data = parse_aqi(get_data())
     print("d", data)
-    tweet = build_text(data)
-
-    send_tweet(msg=tweet)
+    tweet_text = build_text(data)
+    print(tweet_text)
+    tweets = parse_tweets(tweet_text)
+    reply_id = None
+    for tweet in tweets:
+        reply_id = send_tweet(msg=tweet, reply_id=reply_id)
