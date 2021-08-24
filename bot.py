@@ -73,7 +73,7 @@ def chunkify(a_list: list, n: int) -> list:
     return (a_list[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
 
 def parse_tweets(text: str)-> list:
-    parts = len(text) // 280 + 1
+    parts = len(text) // 266 + 1
     if parts == 1:
         return [text]
     lines = text.splitlines()
