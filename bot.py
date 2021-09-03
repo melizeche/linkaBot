@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from typing import List, Dict
 
 from config import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
+from telegram_helper import TelegramService as ts
 
 AQI_URL = "https://rald-dev.greenbeep.com/api/v1/aqi"
 DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
@@ -50,7 +51,14 @@ def get_data() -> List:
     params = f"start={start.strftime(DATETIME_FORMAT)}&end={end.strftime(DATETIME_FORMAT)}"
     url = f"{AQI_URL}?{params}"
     print(url)
-    resp = requests.get(url)
+    try:
+        resp = requests.get(url)
+    except Exception:
+        ts.network_down()
+        exit()
+
+    if resp.status_code != 200:
+        ts.network_down()
     return resp.json()
 
 
