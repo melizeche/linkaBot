@@ -1,3 +1,4 @@
+import pickle
 import requests
 import tweepy
 
@@ -101,10 +102,39 @@ def send_tweet(msg: str, reply_id=None) -> str:
 
     return result.id
 
+def write_sensors(sensors: List[AirQuality]) -> List:
+    sensor_list = [s.source for s in sensors] 
+    with open("sensors.dat", "wb") as file:
+        pickle.dump(sensor_list, file)
+    return sensor_list
+
+def read_file() -> List:
+    sensors = None
+    with open("sensors.dat", "rb") as file:
+        sensors = pickle.load(file)
+
+    return sensors
+
+def sensor_diff(old_data, new_data):
+    new_data = [s.source for s in new_data] 
+    up = None  # set(new) - set(old_data)
+    down = set(old_data) - set(new_data)
+    if up or down:
+        ts.sensor_diff(up, down)
+    return up, down 
+
+
 
 if __name__ == "__main__":
     data = parse_aqi(get_data())
     print("d", data)
+    try:
+        old_data = read_file()
+        sensor_diff(old_data=old_data, new_data=data)
+        write_sensors(data)
+    except Exception as e:
+        print(f"exception reading or writing sensors file: {e}")
+
     tweet_text = build_text(data)
     print(tweet_text)
     tweets = parse_tweets(tweet_text)
