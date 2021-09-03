@@ -16,17 +16,17 @@ class AirQuality:
         self.source = source
 
         if self.index < 51:
-            self.legend = "👍 Libre"
+            self.legend = "🟢👍 Libre"
         elif self.index < 101:
-            self.legend = "😐 Maso"
+            self.legend = "🟡😐 Maso"
         elif self.index < 151:
-            self.legend = "⚠😷️👶💔👴🤰 No tan bien"
+            self.legend = "🟠⚠😷️👶💔👴🤰 No tan bien"
         elif self.index < 201:
-            self.legend = "⚠😷‼️ Insalubre"
+            self.legend = "🔴⚠😷‼️ Insalubre"
         elif self.index < 301:
-            self.legend = "☣️☣️☣️ Muy Insalubre"
+            self.legend = "🟣☣️☣️ Muy Insalubre"
         else:
-            self.legend = "☠️☠️☠️ Peligroso"
+            self.legend = "🟤☠️☠️ Peligroso"
 
     def __repr__(self):
         return f"<{self.source}:{self.index}>"
@@ -81,7 +81,7 @@ def chunkify(a_list: list, n: int) -> list:
     return (a_list[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
 
 def parse_tweets(text: str)-> list:
-    parts = len(text) // 280 + 1
+    parts = len(text) // 266 + 1
     if parts == 1:
         return [text]
     lines = text.splitlines()
