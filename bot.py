@@ -3,6 +3,8 @@ import requests
 import tweepy
 
 from datetime import datetime, timedelta
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 from typing import List, Dict
 
 from config import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
@@ -53,7 +55,16 @@ def get_data() -> List:
     url = f"{AQI_URL}?{params}"
     print(url)
     try:
-        resp = requests.get(url)
+        with requests.Session() as s:
+            retries = Retry(
+                total=8,
+                backoff_factor=1,
+                status_forcelist=[429, 500, 502, 503, 504],
+                allowed_methods=["HEAD", "GET", "OPTIONS"]
+            )
+
+            s.mount('https://', HTTPAdapter(max_retries=retries))
+            resp = s.get(url)
     except Exception:
         ts.network_down()
         exit()
@@ -82,7 +93,7 @@ def chunkify(a_list: list, n: int) -> list:
     return (a_list[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
 
 def parse_tweets(text: str)-> list:
-    parts = len(text) // 266 + 1
+    parts = len(text) // 250 + 1
     if parts == 1:
         return [text]
     lines = text.splitlines()
