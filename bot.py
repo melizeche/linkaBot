@@ -84,7 +84,7 @@ def build_text(aqs: list) -> str:
 {updated}
 {sensors}
 
-Más info en airelib.re
+Más info en AireLib.re
 """
     return text
 
@@ -152,3 +152,14 @@ if __name__ == "__main__":
     reply_id = None
     for tweet in tweets:
         reply_id = send_tweet(msg=tweet, reply_id=reply_id)
+
+    try:  # Mastodon integration
+        from mastodon import Mastodon
+        from config import MASTODON_ACCESS_TOKEN, MASTODON_API_BASE
+
+        mastodon = Mastodon(access_token=MASTODON_ACCESS_TOKEN, api_base_url = MASTODON_API_BASE)
+        toot_text = tweet_text.replace("AireLib.re", "https://AireLib.re").replace("#AireLibre", "#AireLibre #AirQuality #AQI")
+        mastodon.status_post(toot_text, language='es')
+
+    except Exception as e:
+        print(e)
