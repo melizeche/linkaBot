@@ -159,7 +159,7 @@ if __name__ == "__main__":
 
         mastodon = Mastodon(access_token=MASTODON_ACCESS_TOKEN, api_base_url = MASTODON_API_BASE)
         toot_text = tweet_text.replace("AireLib.re", "https://AireLib.re").replace("#AireLibre", "#AireLibre #AirQuality #AQI")
-        mastodon.status_post(toot_text, language='es')
+        mastodon.status_post(toot_text, language='es', visibility="unlisted")
 
     except Exception as e:
         print(e)
