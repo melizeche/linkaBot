@@ -111,7 +111,7 @@ def send_tweet(msg: str, reply_id=None) -> str:
     else:
         result = client.create_tweet(text=msg)
 
-    return result.id
+    return result.data['id']
 
 def write_sensors(sensors: List[AirQuality]) -> List:
     sensor_list = [s.source for s in sensors] 
