@@ -102,14 +102,14 @@ def parse_tweets(text: str)-> list:
     return tweets
 
 def send_tweet(msg: str, reply_id=None) -> str:
-    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
-
-    api = tweepy.API(auth)
+    client = tweepy.Client(
+        consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET,
+        access_token=ACCESS_TOKEN, access_token_secret=ACCESS_TOKEN_SECRET
+    )
     if reply_id:
-        result = api.update_status(status=msg, in_reply_to_status_id=reply_id)
+        result = client.create_tweet(text=msg, in_reply_to_tweet_id=reply_id)
     else:
-        result = api.update_status(status=msg)
+        result = client.create_tweet(text=msg)
 
     return result.id
 

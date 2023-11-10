@@ -1,4 +1,4 @@
 requests==2.25.0
-tweepy==3.9.0
+tweepy==4.14.0
 pyTelegramBotAPI==4.0.0
 Mastodon.py==1.6.3
