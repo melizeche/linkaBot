@@ -8,6 +8,7 @@ from requests.packages.urllib3.util.retry import Retry
 from typing import List, Dict
 
 from config import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
+from screen import get_screenshot
 from telegram_helper import TelegramService as ts
 
 AQI_URL = "https://rald-dev.greenbeep.com/api/v1/aqi"
@@ -101,15 +102,24 @@ def parse_tweets(text: str)-> list:
     tweets = ['\n'.join(pre_tweet) for pre_tweet in pre_lists]  # re build the tweets
     return tweets
 
-def send_tweet(msg: str, reply_id=None) -> str:
+def send_tweet(msg: str, images=[], reply_id=None) -> str:
     client = tweepy.Client(
         consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET,
         access_token=ACCESS_TOKEN, access_token_secret=ACCESS_TOKEN_SECRET
     )
+    # We need to use twitter API v1.1 for media upload, this is stupid
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+
+    api = tweepy.API(auth)
+    print(images)
+    media_ids = [api.simple_upload(i).media_id_string for i in images]
+    print(media_ids)
+   
     if reply_id:
-        result = client.create_tweet(text=msg, in_reply_to_tweet_id=reply_id)
+        result = client.create_tweet(text=msg, in_reply_to_tweet_id=reply_id,)
     else:
-        result = client.create_tweet(text=msg)
+        result = client.create_tweet(text=msg, media_ids=media_ids)
 
     return result.data['id']
 
@@ -150,8 +160,13 @@ if __name__ == "__main__":
     print(tweet_text)
     tweets = parse_tweets(tweet_text)
     reply_id = None
-    for tweet in tweets:
-        reply_id = send_tweet(msg=tweet, reply_id=reply_id)
+    map = get_screenshot()
+    # Commenting this part because twitter API limits
+    #for tweet in tweets:
+    try:
+        reply_id = send_tweet(msg=tweets[0], images=[map._str], reply_id=reply_id)
+    except Exception as e:
+        print(f"exception sending tweet: {e}")
 
     try:  # Mastodon integration
         from mastodon import Mastodon
@@ -159,7 +174,23 @@ if __name__ == "__main__":
 
         mastodon = Mastodon(access_token=MASTODON_ACCESS_TOKEN, api_base_url = MASTODON_API_BASE)
         toot_text = tweet_text.replace("AireLib.re", "https://AireLib.re").replace("#AireLibre", "#AireLibre #AirQuality #AQI")
-        mastodon.status_post(toot_text, language='es', visibility="unlisted")
+
+        img_dict = mastodon.media_post(map._str)
+        mastodon.status_post(toot_text, language='es', visibility="unlisted", media_ids=img_dict)
 
     except Exception as e:
-        print(e)
+        print("Mastodon: ", e)
+# Bluesky Integration
+    try:
+        from atproto import Client, client_utils
+        from config import BSKY_HANDLE, BSKY_APP_PASSWORD
+        client = Client()
+        client.login(BSKY_HANDLE, BSKY_APP_PASSWORD)
+        with open(map._str, "rb") as f:
+            img_data = f.read()
+        post_text = tweets[0].replace("Koa nde aire? #AireLibre", "")
+        post_text = client_utils.TextBuilder().text("Calidad del Aire, mas info en: ").link("AireLib.re","https://AireLib.re").text(post_text)
+        client.send_image(text=post_text, image=img_data, image_alt=tweet_text)
+    except Exception as e:
+        print("Bluesky: ", e)
+    
