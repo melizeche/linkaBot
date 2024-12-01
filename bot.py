@@ -102,7 +102,7 @@ def parse_tweets(text: str)-> list:
     tweets = ['\n'.join(pre_tweet) for pre_tweet in pre_lists]  # re build the tweets
     return tweets
 
-def send_tweet(msg: str, images=[], reply_id=None) -> str:
+def send_tweet(msg: str, images=[], alt_text=None, reply_id=None) -> str:
     client = tweepy.Client(
         consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET,
         access_token=ACCESS_TOKEN, access_token_secret=ACCESS_TOKEN_SECRET
@@ -114,6 +114,8 @@ def send_tweet(msg: str, images=[], reply_id=None) -> str:
     api = tweepy.API(auth)
     print(images)
     media_ids = [api.simple_upload(i).media_id_string for i in images]
+    if media_ids and alt_text:
+        api.create_media_metadata(media_ids[0], alt_text[:1000])
     print(media_ids)
    
     if reply_id:
@@ -148,6 +150,7 @@ def sensor_diff(old_data, new_data):
 
 if __name__ == "__main__":
     data = parse_aqi(get_data())
+    ordered_data = sorted(data, key=lambda obj: obj.index, reverse=True)
     print("d", data)
     try:
         old_data = read_file()
@@ -156,7 +159,8 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"exception reading or writing sensors file: {e}")
 
-    tweet_text = build_text(data)
+    tweet_text_alphabetical = build_text(data)
+    tweet_text = build_text(ordered_data)
     print(tweet_text)
     tweets = parse_tweets(tweet_text)
     reply_id = None
@@ -164,7 +168,7 @@ if __name__ == "__main__":
     # Commenting this part because twitter API limits
     #for tweet in tweets:
     try:
-        reply_id = send_tweet(msg=tweets[0], images=[map._str], reply_id=reply_id)
+        reply_id = send_tweet(msg=tweets[0], images=[map._str], alt_text=tweet_text_alphabetical, reply_id=reply_id)
     except Exception as e:
         print(f"exception sending tweet: {e}")
 
@@ -175,7 +179,7 @@ if __name__ == "__main__":
         mastodon = Mastodon(access_token=MASTODON_ACCESS_TOKEN, api_base_url = MASTODON_API_BASE)
         toot_text = tweet_text.replace("AireLib.re", "https://AireLib.re").replace("#AireLibre", "#AireLibre #AirQuality #AQI")
 
-        img_dict = mastodon.media_post(map._str)
+        img_dict = mastodon.media_post(media_file=map._str, description=tweet_text_alphabetical)
         mastodon.status_post(toot_text, language='es', visibility="unlisted", media_ids=img_dict)
 
     except Exception as e:
@@ -190,7 +194,7 @@ if __name__ == "__main__":
             img_data = f.read()
         post_text = tweets[0].replace("Koa nde aire? #AireLibre", "")
         post_text = client_utils.TextBuilder().text("Calidad del Aire, mas info en: ").link("AireLib.re","https://AireLib.re").text(post_text)
-        client.send_image(text=post_text, image=img_data, image_alt=tweet_text)
+        client.send_image(text=post_text, image=img_data, image_alt=tweet_text_alphabetical)
     except Exception as e:
         print("Bluesky: ", e)
     
