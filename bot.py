@@ -81,7 +81,7 @@ def build_text(aqs: list) -> str:
     for aq in aqs:
         sensors += f"\n{aq.source}: {aq.index} - {aq.legend}"
 
-    text = f"""Koa nde aire? #AireLibre
+    text = f"""Calidad del Aire, mas info en: AireLib.re
 {updated}
 {sensors}
 
@@ -192,7 +192,7 @@ if __name__ == "__main__":
         client.login(BSKY_HANDLE, BSKY_APP_PASSWORD)
         with open(map._str, "rb") as f:
             img_data = f.read()
-        post_text = tweets[0].replace("Koa nde aire? #AireLibre", "")
+        post_text = tweets[0].replace("Calidad del Aire, mas info en: AireLib.re", "")
         post_text = client_utils.TextBuilder().text("Calidad del Aire, mas info en: ").link("AireLib.re","https://AireLib.re").text(post_text)
         client.send_image(text=post_text, image=img_data, image_alt=tweet_text_alphabetical)
     except Exception as e:
