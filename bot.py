@@ -37,6 +37,15 @@ class AirQuality:
 
 
 def parse_aqi(api_response: List[Dict]) -> List:
+    """
+    Converts API response data into a list of AirQuality objects.
+
+    Args:
+        api_response (List[Dict]): API response containing sensor data.
+
+    Returns:
+        List: A list of processed AirQuality objects.
+    """
     sensors = []
     for sensor in api_response:
         source = (
@@ -50,6 +59,12 @@ def parse_aqi(api_response: List[Dict]) -> List:
 
 
 def get_data() -> List:
+    """
+    Fetches air quality data from the AQI API.
+
+    Returns:
+        List: JSON response from the API converted into a list of sensors.
+    """
     end = datetime.utcnow()
     start = end - timedelta(minutes=30)
     params = f"start={start.strftime(DATETIME_FORMAT)}&end={end.strftime(DATETIME_FORMAT)}"
@@ -76,6 +91,15 @@ def get_data() -> List:
 
 
 def build_text(aqs: list) -> str:
+    """
+    Generates a descriptive text summarizing air quality levels.
+
+    Args:
+        aqs (list): List of AirQuality objects.
+
+    Returns:
+        str: Text summary of sensors and their indices.
+    """
     updated = datetime.now().strftime("%Y-%m-%d %H:%M")
     sensors = ""
     for aq in aqs:
@@ -90,10 +114,29 @@ Más info en AireLib.re
     return text
 
 def chunkify(a_list: list, n: int) -> list:
+    """
+    Divides a list into approximately `n` equal parts.
+
+    Args:
+        a_list (list): List to be divided.
+        n (int): Number of parts to divide into.
+
+    Returns:
+        list: List of sublists.
+    """
     k, m = divmod(len(a_list), n)
     return (a_list[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n))
 
 def parse_tweets(text: str)-> list:
+    """
+    Splits a long text into tweet-friendly segments.
+
+    Args:
+        text (str): Text to be split.
+
+    Returns:
+        list: List of split texts, each within Twitter's character limits.
+    """
     parts = len(text) // 250 + 1
     if parts == 1:
         return [text]
@@ -103,6 +146,18 @@ def parse_tweets(text: str)-> list:
     return tweets
 
 def send_tweet(msg: str, images=[], alt_text=None, reply_id=None) -> str:
+    """
+    Sends a tweet with text, optional images, and metadata.
+
+    Args:
+        msg (str): Text content of the tweet.
+        images (list): List of paths to images to attach.
+        alt_text (str, optional): Alt text for the image.
+        reply_id (str, optional): ID of the tweet to reply to.
+
+    Returns:
+        str: ID of the sent tweet.
+    """
     client = tweepy.Client(
         consumer_key=CONSUMER_KEY, consumer_secret=CONSUMER_SECRET,
         access_token=ACCESS_TOKEN, access_token_secret=ACCESS_TOKEN_SECRET
@@ -149,6 +204,14 @@ def sensor_diff(old_data, new_data):
 
 
 if __name__ == "__main__":
+    """
+    Main script for fetching air quality data and posting updates.
+
+    Steps:
+    1. Fetch and process AQI data.
+    2. Detect sensor changes.
+    3. Generate updates for Twitter, Mastodon, and Bluesky.
+    """
     data = parse_aqi(get_data())
     ordered_data = sorted(data, key=lambda obj: obj.index, reverse=True)
     print("d", data)
