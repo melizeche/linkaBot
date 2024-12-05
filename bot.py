@@ -5,7 +5,7 @@ import tweepy
 from datetime import datetime, timedelta
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-from typing import List, Dict
+from typing import List, Dict, Tuple, Optional, Set
 
 from config import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
 from screen import get_screenshot
@@ -193,7 +193,7 @@ def read_file() -> List:
 
     return sensors
 
-def sensor_diff(old_data, new_data):
+def sensor_diff(old_data: List, new_data: List) -> Tuple[Optional[Set[str]], Set[str]]:
     new_data = [s.source for s in new_data] 
     up = None  # set(new) - set(old_data)
     down = set(old_data) - set(new_data)
