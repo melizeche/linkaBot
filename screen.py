@@ -8,21 +8,23 @@ URL = (
     "https://airelib.re"
 )
 
+# Directory where screenshots will be saved
 SCREENSHOTS_DIR = Path.cwd().joinpath("screenshots")
 if not SCREENSHOTS_DIR.exists():
-    SCREENSHOTS_DIR.mkdir()
+    SCREENSHOTS_DIR.mkdir()  # Create the directory if it doesn't exist
 
 
 def get_screenshot():
-    # Headless Chrome/Selenium setup
+    # Selenium setup to use Chrome in headless mode
     options = webdriver.ChromeOptions()
-    options.add_argument("headless")
-    options.add_argument("disable-infobars")  # disabling infobars
-    options.add_argument("--disable-extensions")  # disabling extensions
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--no-sandbox")  # Bypass OS security model
-    # Thanks to https://stackoverflow.com/a/50642913/2291648 for explaining the arguments above
+    options.add_argument("headless")  # Run browser without GUI
+    options.add_argument("disable-infobars")  # Disable info bars
+    options.add_argument("--disable-extensions")  # Disable browser extensions
+    options.add_argument("--disable-dev-shm-usage")  # Use /dev/shm efficiently
+    options.add_argument("--no-sandbox")  # Bypass OS security restrictions
+    # The arguments above help optimize headless Chrome; source: https://stackoverflow.com/a/50642913/2291648
 
+    # Generate a timestamp for the screenshot file name
     timestamp_str = datetime.now().strftime("%b%d-%H")
     screenshot_path = SCREENSHOTS_DIR.joinpath(f"screen_{timestamp_str}.png")
     print(screenshot_path)
