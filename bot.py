@@ -107,9 +107,8 @@ def build_text(aqs: list) -> str:
 
     text = f"""Calidad del Aire, mas info en: AireLib.re
 {updated}
+Top 👎
 {sensors}
-
-Más info en AireLib.re
 """
     return text
 
