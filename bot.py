@@ -11,7 +11,7 @@ from config import CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SEC
 from screen import get_screenshot
 from telegram_helper import TelegramService as ts
 
-AQI_URL = "https://rald-dev.greenbeep.com/api/v1/aqi"
+AQI_URL = "https://api.airelib.re/api/v1/aqi"
 DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S"
 
 class AirQuality:
