@@ -58,7 +58,7 @@ def parse_aqi(api_response: List[Dict]) -> List:
     return sensors
 
 
-def get_data() -> List:
+def get_data() -> List[Dict]:
     """
     Fetches air quality data from the AQI API.
 
