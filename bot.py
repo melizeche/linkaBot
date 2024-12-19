@@ -66,17 +66,18 @@ def get_data() -> List:
         List: JSON response from the API converted into a list of sensors.
     """
     end = datetime.utcnow()
-    start = end - timedelta(minutes=30)
+    start = end - timedelta(minutes=60)  # Calculate the time 30 minutes ago
+    # Construct the query parameters for the API request
     params = f"start={start.strftime(DATETIME_FORMAT)}&end={end.strftime(DATETIME_FORMAT)}"
-    url = f"{AQI_URL}?{params}"
+    url = f"{AQI_URL}?{params}"  # Construct the full URL
     print(url)
     try:
-        with requests.Session() as s:
+        with requests.Session() as s: # Use a session for connection pooling and retries
             retries = Retry(
-                total=8,
-                backoff_factor=1,
-                status_forcelist=[429, 500, 502, 503, 504],
-                allowed_methods=["HEAD", "GET", "OPTIONS"]
+                total=8,  # Maximum number of retries
+                backoff_factor=1,  # Delay between retries (1, 2, 4, 8, 16, 32, 64 seconds...)
+                status_forcelist=[429, 500, 502, 503, 504],  # HTTP status codes to retry on (server errors, rate limiting)
+                allowed_methods=["HEAD", "GET", "OPTIONS"] # Allowed methods for retrying
             )
 
             s.mount('https://', HTTPAdapter(max_retries=retries))
