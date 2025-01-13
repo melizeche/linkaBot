@@ -232,7 +232,7 @@ if __name__ == "__main__":
     # Commenting this part because twitter API limits
     #for tweet in tweets:
     try:
-        reply_id = send_tweet(msg=tweets[0], images=[map._str], alt_text=tweet_text_alphabetical, reply_id=reply_id)
+        reply_id = send_tweet(msg=tweets[0], images=[map._str], alt_text=tweet_text_alphabetical[:940], reply_id=reply_id)
     except Exception as e:
         print(f"exception sending tweet: {e}")
 
